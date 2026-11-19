@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es-CO">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="App educativa para identificar cuándo acudir a urgencias en Colombia." />
+  <meta name="theme-color" content="#c0392b" />
+  <title>¿Es una urgencia? — Guía educativa (Colombia)</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <!-- Barra superior con acceso directo al 123 -->
+  <header class="appbar">
+    <div class="appbar__title">
+      <span class="appbar__logo" aria-hidden="true">🚑</span>
+      <span>¿Es una urgencia?</span>
+    </div>
+    <a class="btn-123" href="tel:123" aria-label="Llamar al 123, línea de emergencias">
+      📞 Llamar 123
+    </a>
+  </header>
+
+  <!-- Aviso educativo -->
+  <div class="disclaimer" role="note">
+    <strong>Guía educativa.</strong> No reemplaza la valoración de un profesional de salud.
+    Ante una emergencia real, llame al <strong>123</strong>.
+  </div>
+
+  <!-- Navegación por pestañas -->
+  <nav class="tabs" role="tablist" aria-label="Secciones">
+    <button class="tab tab--active" data-tab="buscar" role="tab">🔎 Buscar síntoma</button>
+    <button class="tab" data-tab="abc" role="tab">🆘 El ABC</button>
+    <button class="tab" data-tab="hospitales" role="tab">📍 Hospitales</button>
+    <button class="tab" data-tab="causas" role="tab">📊 Causas</button>
+    <button class="tab" data-tab="especialidades" role="tab">🏥 Especialidades</button>
+  </nav>
+
+  <main class="content">
+    <!-- SECCIÓN: BUSCADOR DE SÍNTOMAS -->
+    <section id="tab-buscar" class="panel panel--active" role="tabpanel">
+      <h1 class="h1">¿Qué le pasa?</h1>
+      <p class="lead">Escriba su molestia (ej. <em>“me duele el ojo”</em>) y le orientamos a dónde ir.</p>
+      <div class="search">
+        <input
+          id="search-input"
+          class="search__input"
+          type="search"
+          placeholder="Ej: me duele el pecho, fiebre, dolor de cabeza…"
+          autocomplete="off"
+          aria-label="Describa su síntoma"
+        />
+      </div>
+      <div class="chips" id="chips" aria-label="Síntomas frecuentes"></div>
+      <div id="resultados" class="resultados" aria-live="polite"></div>
+    </section>
+
+    <!-- SECCIÓN: ABC -->
+    <section id="tab-abc" class="panel" role="tabpanel">
+      <h1 class="h1">El ABC de una urgencia</h1>
+      <p class="lead">
+        El <strong>ABC</strong> son las tres cosas que mantienen a una persona con vida.
+        Si falla alguna, es una <strong>emergencia</strong>: llame al 123.
+      </p>
+      <div id="abc-list" class="abc-list"></div>
+    </section>
+
+    <!-- SECCIÓN: HOSPITALES (Subred Norte) -->
+    <section id="tab-hospitales" class="panel" role="tabpanel">
+      <h1 class="h1">¿A dónde ir? — Subred Norte</h1>
+      <p class="lead">
+        Red pública de la <strong>Subred Integrada de Servicios de Salud Norte E.S.E.</strong>
+        Elija su localidad para ver las sedes y cuáles tienen urgencias.
+      </p>
+      <div class="search">
+        <label class="loc-label" for="loc-select">Localidad</label>
+        <select id="loc-select" class="search__input" aria-label="Seleccione su localidad">
+          <option value="todas">Todas las localidades</option>
+        </select>
+      </div>
+      <div id="hospitales-list" class="hosp-list" aria-live="polite"></div>
+    </section>
+
+    <!-- SECCIÓN: CAUSAS DE MORTALIDAD -->
+    <section id="tab-causas" class="panel" role="tabpanel">
+      <h1 class="h1">Principales causas de muerte en Colombia</h1>
+      <p class="lead">
+        Según el <strong>DANE</strong> (Estadísticas Vitales). Conozca sus signos de alarma
+        para reconocerlas a tiempo.
+      </p>
+      <div id="causas-list" class="causas-list"></div>
+    </section>
+
+    <!-- SECCIÓN: ESPECIALIDADES -->
+    <section id="tab-especialidades" class="panel" role="tabpanel">
+      <h1 class="h1">¿A qué especialidad acudir?</h1>
+      <p class="lead">Orientación general por tipo de molestia.</p>
+      <div id="especialidades-list" class="esp-list"></div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <p>Contenido educativo. Fuentes: DANE (Estadísticas Vitales) y criterios generales de educación en salud.</p>
+    <p>Línea de emergencias Colombia: <a href="tel:123"><strong>123</strong></a></p>
+  </footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/hospitales.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

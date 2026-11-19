@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html lang="es-CO">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="App educativa para identificar cuándo acudir a urgencias en Colombia." />
+  <meta name="theme-color" content="#c0392b" />
+  <title>¿Es una urgencia? — Guía educativa (Colombia)</title>
+  <style>
+/* styles.css — Mobile-first. Pensado para migrar a app móvil. */
+
+:root {
+  --rojo: #c0392b;
+  --naranja: #e67e22;
+  --azul: #2980b9;
+  --verde: #27ae60;
+  --texto: #1f2a33;
+  --gris: #5b6b78;
+  --fondo: #f4f6f8;
+  --tarjeta: #ffffff;
+  --borde: #e2e8ee;
+  --radio: 14px;
+  --sombra: 0 2px 10px rgba(0, 0, 0, 0.06);
+}
+
+* { box-sizing: border-box; }
+
+html, body { margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: var(--fondo);
+  color: var(--texto);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  padding-bottom: 40px;
+}
+
+/* Barra superior */
+.appbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--rojo);
+  color: #fff;
+  box-shadow: var(--sombra);
+}
+.appbar__title { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 1.05rem; }
+.appbar__logo { font-size: 1.3rem; }
+.btn-123 {
+  background: #fff;
+  color: var(--rojo);
+  font-weight: 800;
+  text-decoration: none;
+  padding: 9px 14px;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  white-space: nowrap;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+.btn-123:active { transform: scale(0.97); }
+
+/* Aviso */
+.disclaimer {
+  background: #fff8e1;
+  border-bottom: 1px solid #f0e2b0;
+  color: #6b5a12;
+  font-size: 0.85rem;
+  padding: 10px 16px;
+}
+
+/* Pestañas */
+.tabs {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 10px 12px;
+  background: var(--tarjeta);
+  border-bottom: 1px solid var(--borde);
+  -webkit-overflow-scrolling: touch;
+}
+.tab {
+  flex: 0 0 auto;
+  border: 1px solid var(--borde);
+  background: #fff;
+  color: var(--gris);
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.tab--active { background: var(--texto); color: #fff; border-color: var(--texto); }
+
+/* Contenido */
+.content { max-width: 720px; margin: 0 auto; padding: 16px; }
+.panel { display: none; animation: fade 0.2s ease; }
+.panel--active { display: block; }
+@keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+.h1 { font-size: 1.4rem; margin: 4px 0 6px; }
+.lead { color: var(--gris); margin: 0 0 16px; font-size: 0.98rem; }
+
+/* Buscador */
+.search__input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid var(--borde);
+  border-radius: var(--radio);
+  font-size: 1rem;
+  background: #fff;
+}
+.search__input:focus { outline: none; border-color: var(--azul); }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 18px; }
+.chip {
+  border: 1px solid var(--borde);
+  background: #fff;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--texto);
+  box-shadow: var(--sombra);
+}
+.chip:active { transform: scale(0.97); }
+
+/* Tarjetas de resultado */
+.resultados { display: grid; gap: 12px; }
+.card {
+  background: var(--tarjeta);
+  border: 1px solid var(--borde);
+  border-left: 6px solid var(--gris);
+  border-radius: var(--radio);
+  padding: 14px 16px;
+  box-shadow: var(--sombra);
+}
+.card__head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.card__title { font-size: 1.1rem; font-weight: 700; margin: 0; }
+.badge {
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.card__adonde { margin: 8px 0; font-weight: 600; }
+.card__meta { font-size: 0.9rem; color: var(--gris); }
+.card__nivelmsg { font-size: 0.9rem; margin: 8px 0 0; color: var(--texto); }
+
+.alarma-titulo { font-weight: 700; font-size: 0.9rem; margin: 12px 0 6px; color: var(--rojo); }
+.alarma-lista { margin: 0; padding-left: 18px; font-size: 0.9rem; }
+.alarma-lista li { margin-bottom: 4px; }
+
+.empty { color: var(--gris); text-align: center; padding: 24px; }
+
+/* ABC */
+.abc-list { display: grid; gap: 14px; }
+.abc-card {
+  background: var(--tarjeta);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  padding: 14px 16px;
+  box-shadow: var(--sombra);
+}
+.abc-card__head { display: flex; align-items: center; gap: 12px; }
+.abc-letra {
+  background: var(--rojo);
+  color: #fff;
+  font-weight: 800;
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  display: grid; place-items: center;
+  font-size: 1.3rem;
+  flex: 0 0 auto;
+}
+.abc-card__nombre { font-weight: 700; }
+.abc-card__pregunta { font-style: italic; color: var(--gris); margin: 8px 0; }
+
+/* Causas */
+.causas-list { display: grid; gap: 12px; }
+.causa {
+  background: var(--tarjeta);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  box-shadow: var(--sombra);
+  overflow: hidden;
+}
+.causa__head {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 14px; cursor: pointer; user-select: none;
+}
+.causa__puesto {
+  background: var(--texto); color: #fff; font-weight: 800;
+  width: 28px; height: 28px; border-radius: 8px;
+  display: grid; place-items: center; font-size: 0.9rem; flex: 0 0 auto;
+}
+.causa__nombre { font-weight: 700; flex: 1; font-size: 0.98rem; }
+.causa__toggle { color: var(--gris); font-size: 1.2rem; }
+.causa__body { padding: 0 14px 14px; border-top: 1px solid var(--borde); display: none; }
+.causa--open .causa__body { display: block; }
+.causa__quees { color: var(--gris); font-size: 0.92rem; margin: 10px 0; }
+.causa__nota { background: #f0f6ff; border-radius: 10px; padding: 8px 10px; font-size: 0.85rem; margin-top: 10px; }
+
+/* Especialidades */
+.esp-list { display: grid; gap: 10px; }
+.esp {
+  background: var(--tarjeta);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  padding: 12px 14px;
+  box-shadow: var(--sombra);
+}
+.esp__nombre { font-weight: 700; margin-bottom: 4px; }
+.esp__motivo { color: var(--gris); font-size: 0.9rem; }
+
+/* Hospitales */
+.loc-label { display: block; font-size: 0.85rem; color: var(--gris); margin-bottom: 6px; font-weight: 600; }
+.hosp-list { display: grid; gap: 12px; margin-top: 14px; }
+.hosp__acciones { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+.hosp__btn {
+  flex: 1 1 auto;
+  text-align: center;
+  text-decoration: none;
+  background: var(--rojo);
+  color: #fff;
+  font-weight: 700;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  min-width: 120px;
+}
+.hosp__btn--ghost { background: #fff; color: var(--azul); border: 1px solid var(--azul); }
+.hosp__btn:active { transform: scale(0.98); }
+
+/* Sede sugerida dentro del resultado de síntoma */
+.sede-sugerida {
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: #f0f6ff;
+  border: 1px solid #d4e5fb;
+  border-radius: 10px;
+  font-size: 0.9rem;
+}
+.sede-sugerida__titulo { font-weight: 700; margin: 0 0 6px; color: var(--azul); }
+.sede-sugerida__item {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 8px;
+  padding: 6px 0; border-top: 1px dashed #d4e5fb; font-size: 0.88rem;
+}
+.sede-sugerida__item:first-of-type { border-top: none; }
+.hosp__link { text-decoration: none; font-size: 1.1rem; flex: 0 0 auto; }
+
+/* Pie */
+.foot {
+  max-width: 720px; margin: 24px auto 0; padding: 16px;
+  color: var(--gris); font-size: 0.82rem; text-align: center;
+  border-top: 1px solid var(--borde);
+}
+.foot a { color: var(--rojo); }
+
+@media (min-width: 560px) {
+  .resultados, .causas-list { grid-template-columns: 1fr; }
+}
+
+</style>
+</head>
+<body>
+  <!-- Barra superior con acceso directo al 123 -->
+  <header class="appbar">
+    <div class="appbar__title">
+      <span class="appbar__logo" aria-hidden="true">🚑</span>
+      <span>¿Es una urgencia?</span>
+    </div>
+    <a class="btn-123" href="tel:123" aria-label="Llamar al 123, línea de emergencias">
+      📞 Llamar 123
+    </a>
+  </header>
+
+  <!-- Aviso educativo -->
+  <div class="disclaimer" role="note">
+    <strong>Guía educativa.</strong> No reemplaza la valoración de un profesional de salud.
+    Ante una emergencia real, llame al <strong>123</strong>.
+  </div>
+
+  <!-- Navegación por pestañas -->
+  <nav class="tabs" role="tablist" aria-label="Secciones">
+    <button class="tab tab--active" data-tab="buscar" role="tab">🔎 Buscar síntoma</button>
+    <button class="tab" data-tab="abc" role="tab">🆘 El ABC</button>
+    <button class="tab" data-tab="hospitales" role="tab">📍 Hospitales</button>
+    <button class="tab" data-tab="causas" role="tab">📊 Causas</button>
+    <button class="tab" data-tab="especialidades" role="tab">🏥 Especialidades</button>
+  </nav>
+
+  <main class="content">
+    <!-- SECCIÓN: BUSCADOR DE SÍNTOMAS -->
+    <section id="tab-buscar" class="panel panel--active" role="tabpanel">
+      <h1 class="h1">¿Qué le pasa?</h1>
+      <p class="lead">Escriba su molestia (ej. <em>“me duele el ojo”</em>) y le orientamos a dónde ir.</p>
+      <div class="search">
+        <input
+          id="search-input"
+          class="search__input"
+          type="search"
+          placeholder="Ej: me duele el pecho, fiebre, dolor de cabeza…"
+          autocomplete="off"
+          aria-label="Describa su síntoma"
+        />
+      </div>
+      <div class="chips" id="chips" aria-label="Síntomas frecuentes"></div>
+      <div id="resultados" class="resultados" aria-live="polite"></div>
+    </section>
+
+    <!-- SECCIÓN: ABC -->
+    <section id="tab-abc" class="panel" role="tabpanel">
+      <h1 class="h1">El ABC de una urgencia</h1>
+      <p class="lead">
+        El <strong>ABC</strong> son las tres cosas que mantienen a una persona con vida.
+        Si falla alguna, es una <strong>emergencia</strong>: llame al 123.
+      </p>
+      <div id="abc-list" class="abc-list"></div>
+    </section>
+
+    <!-- SECCIÓN: HOSPITALES (Subred Norte) -->
+    <section id="tab-hospitales" class="panel" role="tabpanel">
+      <h1 class="h1">¿A dónde ir? — Subred Norte</h1>
+      <p class="lead">
+        Red pública de la <strong>Subred Integrada de Servicios de Salud Norte E.S.E.</strong>
+        Elija su localidad para ver las sedes y cuáles tienen urgencias.
+      </p>
+      <div class="search">
+        <label class="loc-label" for="loc-select">Localidad</label>
+        <select id="loc-select" class="search__input" aria-label="Seleccione su localidad">
+          <option value="todas">Todas las localidades</option>
+        </select>
+      </div>
+      <div id="hospitales-list" class="hosp-list" aria-live="polite"></div>
+    </section>
+
+    <!-- SECCIÓN: CAUSAS DE MORTALIDAD -->
+    <section id="tab-causas" class="panel" role="tabpanel">
+      <h1 class="h1">Principales causas de muerte en Colombia</h1>
+      <p class="lead">
+        Según el <strong>DANE</strong> (Estadísticas Vitales). Conozca sus signos de alarma
+        para reconocerlas a tiempo.
+      </p>
+      <div id="causas-list" class="causas-list"></div>
+    </section>
+
+    <!-- SECCIÓN: ESPECIALIDADES -->
+    <section id="tab-especialidades" class="panel" role="tabpanel">
+      <h1 class="h1">¿A qué especialidad acudir?</h1>
+      <p class="lead">Orientación general por tipo de molestia.</p>
+      <div id="especialidades-list" class="esp-list"></div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <p>Contenido educativo. Fuentes: DANE (Estadísticas Vitales) y criterios generales de educación en salud.</p>
+    <p>Línea de emergencias Colombia: <a href="tel:123"><strong>123</strong></a></p>
+  </footer>
+
+  <script>
+/**
+ * data.js — Contenido clínico educativo de la app "¿Es una urgencia?"
+ *
+ * FUENTES:
+ * - Niveles de urgencia y signos de alarma: criterios generales de triaje y
+ *   educación en salud (orientativos, NO diagnósticos).
+ * - Causas de mortalidad: DANE, Estadísticas Vitales (reportes 2024–2025).
+ * - Línea de emergencias: 123, Número Único Nacional de Seguridad y Emergencias.
+ *
+ * AVISO: Este contenido es EDUCATIVO. No reemplaza la valoración de un
+ * profesional de salud. Ante una emergencia real, llame al 123.
+ */
+
+/* Niveles de orientación que puede devolver la app */
+const NIVELES = {
+  EMERGENCIA: {
+    id: 'emergencia',
+    titulo: 'Emergencia — llame al 123 ya',
+    color: '#c0392b',
+    mensaje:
+      'Estos signos pueden poner en riesgo la vida. No conduzca usted mismo si puede evitarlo. Llame al 123 o vaya de inmediato al servicio de urgencias más cercano.',
+  },
+  URGENCIA: {
+    id: 'urgencia',
+    titulo: 'Acuda pronto a urgencias',
+    color: '#e67e22',
+    mensaje:
+      'Conviene que lo valore un profesional hoy mismo en un servicio de urgencias. No espere a que empeore.',
+  },
+  CONSULTA: {
+    id: 'consulta',
+    titulo: 'Consulta prioritaria / especialista',
+    color: '#2980b9',
+    mensaje:
+      'Probablemente no es una emergencia vital, pero debe ser valorado pronto. Pida cita prioritaria o acuda a la especialidad indicada. Si empeora o aparecen signos de alarma, vaya a urgencias.',
+  },
+  AUTOCUIDADO: {
+    id: 'autocuidado',
+    titulo: 'Observación y autocuidado',
+    color: '#27ae60',
+    mensaje:
+      'Suele poder manejarse con observación y cuidados en casa. Si no mejora en el tiempo esperado o aparecen signos de alarma, consulte.',
+  },
+};
+
+/**
+ * El "ABC" de la valoración inicial de urgencias.
+ * A = Airway (vía aérea), B = Breathing (respiración), C = Circulation (circulación).
+ * Es la base para reconocer una situación que amenaza la vida.
+ */
+const ABC = [
+  {
+    letra: 'A',
+    nombre: 'Vía aérea (Airway)',
+    pregunta: '¿La persona puede hablar o respirar sin obstrucción?',
+    alarma: [
+      'No puede hablar, toser ni respirar (posible atragantamiento)',
+      'Se lleva las manos al cuello / se pone morada (cianosis) en labios o cara',
+      'Ruido agudo al inspirar (estridor) o babeo con imposibilidad de tragar',
+    ],
+    accion: 'Signo de EMERGENCIA. Llame al 123. Si hay atragantamiento y la persona no puede toser, aplique maniobras de desobstrucción si sabe hacerlas.',
+  },
+  {
+    letra: 'B',
+    nombre: 'Respiración (Breathing)',
+    pregunta: '¿Respira con normalidad?',
+    alarma: [
+      'Dificultad para respirar en reposo o al hablar',
+      'Respiración muy rápida, muy lenta o pausas',
+      'Labios o uñas azulados, hundimiento de las costillas al respirar (en niños)',
+    ],
+    accion: 'Signo de EMERGENCIA. Llame al 123. Mantenga a la persona sentada y calmada.',
+  },
+  {
+    letra: 'C',
+    nombre: 'Circulación (Circulation)',
+    pregunta: '¿Hay pulso y buena circulación?',
+    alarma: [
+      'No responde y no respira: inicie RCP y llame al 123',
+      'Sangrado abundante que no se detiene',
+      'Piel fría, pálida o sudorosa, pulso muy débil o muy rápido',
+      'Dolor en el pecho con sudoración, náuseas o dolor que irradia al brazo/mandíbula',
+    ],
+    accion: 'Signo de EMERGENCIA. Llame al 123. Controle el sangrado con presión directa. Si no respira, inicie RCP.',
+  },
+];
+
+/**
+ * 10 principales causas de mortalidad en Colombia (DANE, Estadísticas Vitales 2024–2025).
+ * Para cada una: qué es (lenguaje sencillo) y SIGNOS DE ALARMA para reconocerla a tiempo.
+ * Las causas externas (p. ej. agresiones) se incluyen como contexto, no como autodiagnóstico.
+ */
+const CAUSAS_MORTALIDAD = [
+  {
+    puesto: 1,
+    nombre: 'Enfermedad isquémica del corazón (infarto)',
+    quees: 'Bloqueo del flujo de sangre al corazón. Incluye el infarto agudo de miocardio.',
+    alarma: [
+      'Dolor u opresión en el pecho que dura más de unos minutos',
+      'Dolor que se corre al brazo (sobre todo izquierdo), mandíbula, cuello o espalda',
+      'Sudoración fría, náuseas, falta de aire, sensación de muerte inminente',
+    ],
+    nivel: NIVELES.EMERGENCIA,
+    especialidad: 'Cardiología',
+  },
+  {
+    puesto: 2,
+    nombre: 'Enfermedad cerebrovascular (ACV / derrame)',
+    quees: 'Interrupción del flujo de sangre al cerebro (isquémico) o sangrado (hemorrágico).',
+    alarma: [
+      'Cara torcida / boca desviada de un lado (pídale sonreír)',
+      'Debilidad o adormecimiento de un brazo o una pierna',
+      'Dificultad para hablar o entender, habla enredada',
+      'Pérdida súbita de visión, mareo intenso o dolor de cabeza repentino y fuerte',
+    ],
+    nivel: NIVELES.EMERGENCIA,
+    especialidad: 'Neurología',
+    nota: 'Regla CARA–BRAZO–HABLA–TIEMPO: el tiempo es cerebro. Llame al 123 de inmediato.',
+  },
+  {
+    puesto: 3,
+    nombre: 'Enfermedad crónica de las vías respiratorias (EPOC)',
+    quees: 'Daño crónico de los pulmones (frecuente en fumadores), que puede descompensarse.',
+    alarma: [
+      'Falta de aire que empeora de forma marcada',
+      'Labios o uñas azulados',
+      'Confusión o somnolencia por falta de oxígeno',
+      'Fiebre con aumento y cambio de color de las flemas',
+    ],
+    nivel: NIVELES.URGENCIA,
+    especialidad: 'Neumología',
+  },
+  {
+    puesto: 4,
+    nombre: 'Agresiones / causas externas',
+    quees: 'Lesiones por violencia o trauma. Es una de las primeras causas de muerte en Colombia (DANE).',
+    alarma: [
+      'Heridas con sangrado abundante',
+      'Traumatismo de cabeza con pérdida de conocimiento, vómito o confusión',
+      'Dificultad para respirar o dolor intenso tras un golpe',
+    ],
+    nivel: NIVELES.EMERGENCIA,
+    especialidad: 'Urgencias / Cirugía',
+    nota: 'Contexto incluido con fines educativos. Ante violencia, además del 123, existen líneas de protección.',
+  },
+  {
+    puesto: 5,
+    nombre: 'Diabetes mellitus',
+    quees: 'Alteración del azúcar en la sangre. Puede descompensarse hacia valores muy altos o muy bajos.',
+    alarma: [
+      'Azúcar muy baja: temblor, sudor frío, confusión, pérdida de conocimiento',
+      'Azúcar muy alta: sed intensa, orinar mucho, aliento afrutado, respiración rápida',
+      'Vómito persistente, somnolencia o desorientación en persona diabética',
+    ],
+    nivel: NIVELES.URGENCIA,
+    especialidad: 'Medicina interna / Endocrinología',
+  },
+  {
+    puesto: 6,
+    nombre: 'Enfermedades hipertensivas',
+    quees: 'Complicaciones por presión arterial alta no controlada.',
+    alarma: [
+      'Dolor de cabeza intenso con visión borrosa',
+      'Dolor en el pecho o falta de aire',
+      'Presión muy alta con síntomas neurológicos (confusión, debilidad)',
+    ],
+    nivel: NIVELES.URGENCIA,
+    especialidad: 'Medicina interna / Cardiología',
+  },
+  {
+    puesto: 7,
+    nombre: 'Infecciones respiratorias agudas (neumonía)',
+    quees: 'Infección de los pulmones o vías respiratorias.',
+    alarma: [
+      'Fiebre alta con dificultad para respirar',
+      'Dolor en el pecho al respirar',
+      'En adultos mayores o niños: respiración rápida, decaimiento marcado',
+    ],
+    nivel: NIVELES.URGENCIA,
+    especialidad: 'Medicina general / Neumología',
+  },
+  {
+    puesto: 8,
+    nombre: 'Tumores malignos (cáncer)',
+    quees: 'Crecimiento anormal de células. Entre los más frecuentes: pulmón, estómago, mama, colon.',
+    alarma: [
+      'Sangrado inexplicable (al toser, en heces u orina)',
+      'Pérdida de peso importante sin causa',
+      'Masa o bulto que crece, dolor persistente que no cede',
+    ],
+    nivel: NIVELES.CONSULTA,
+    especialidad: 'Oncología (valoración prioritaria)',
+    nota: 'La mayoría no son urgencias del momento, pero requieren estudio pronto. Algunas complicaciones (sangrado, obstrucción) sí son urgencia.',
+  },
+  {
+    puesto: 9,
+    nombre: 'Enfermedades del sistema urinario',
+    quees: 'Incluye infecciones urinarias complicadas y falla renal.',
+    alarma: [
+      'Fiebre con dolor intenso en la espalda baja o costado',
+      'No poder orinar o dolor fuerte al orinar con fiebre',
+      'Hinchazón, confusión o disminución importante de la orina',
+    ],
+    nivel: NIVELES.URGENCIA,
+    especialidad: 'Urología / Nefrología',
+  },
+  {
+    puesto: 10,
+    nombre: 'Enfermedades del aparato digestivo',
+    quees: 'Incluye cirrosis, sangrado digestivo y otras enfermedades del hígado e intestino.',
+    alarma: [
+      'Vómito con sangre o heces negras',
+      'Dolor abdominal intenso que no cede',
+      'Piel u ojos amarillos (ictericia) con dolor y fiebre',
+    ],
+    nivel: NIVELES.URGENCIA,
+    especialidad: 'Gastroenterología / Cirugía',
+  },
+];
+
+/**
+ * BUSCADOR DE SÍNTOMAS.
+ * Cada entrada: palabras clave (para buscar "me duele el ojo"), a dónde ir,
+ * especialidad y signos de alarma que elevan el nivel a urgencia/emergencia.
+ */
+const SINTOMAS = [
+  {
+    nombre: 'Dolor en el pecho',
+    claves: ['pecho', 'corazon', 'infarto', 'opresion', 'dolor en el pecho'],
+    nivel: NIVELES.EMERGENCIA,
+    adonde: 'Urgencias de inmediato / llame al 123',
+    especialidad: 'Cardiología',
+    especialidadesRequeridas: ['Medicina interna', 'Urgencias adultos'],
+    alarma: ['Dolor que irradia al brazo o mandíbula', 'Sudoración, náuseas, falta de aire'],
+  },
+  {
+    nombre: 'Dificultad para respirar',
+    claves: ['respirar', 'ahogo', 'falta de aire', 'asfixia', 'no puedo respirar'],
+    nivel: NIVELES.EMERGENCIA,
+    adonde: 'Urgencias de inmediato / llame al 123',
+    especialidad: 'Neumología / Urgencias',
+    especialidadesRequeridas: ['Urgencias adultos', 'Medicina interna'],
+    alarma: ['Labios azulados', 'No puede completar frases por la falta de aire'],
+  },
+  {
+    nombre: 'Me fracturé / hueso roto',
+    claves: ['fractura', 'fracture', 'hueso', 'quebre', 'me quebre', 'roto', 'luxacion', 'esguince'],
+    nivel: NIVELES.URGENCIA,
+    adonde: 'Urgencias con ortopedia',
+    especialidad: 'Ortopedia / Traumatología',
+    especialidadesRequeridas: ['Ortopedia y traumatología', 'Cirugía general', 'Anestesiología'],
+    alarma: [
+      'Hueso expuesto o deformidad evidente → EMERGENCIA',
+      'Pérdida de sensibilidad, miembro frío o pálido → EMERGENCIA',
+      'Sangrado abundante asociado → EMERGENCIA',
+    ],
+  },
+  {
+    nombre: 'Dolor / lesión en manos o brazos',
+    claves: ['mano', 'manos', 'brazo', 'brazos', 'muneca', 'dedo', 'dedos', 'codo'],
+    nivel: NIVELES.URGENCIA,
+    adonde: 'Urgencias con ortopedia',
+    especialidad: 'Ortopedia / Traumatología',
+    especialidadesRequeridas: ['Ortopedia y traumatología', 'Cirugía general'],
+    alarma: [
+      'Deformidad, no poder mover la mano/brazo → URGENCIA',
+      'Herida profunda o amputación → EMERGENCIA (lleve la parte amputada en frío)',
+      'Mano fría, pálida o sin sensibilidad → EMERGENCIA',
+    ],
+  },
+  {
+    nombre: 'Dolor de ojo / problema de visión',
+    claves: ['ojo', 'ojos', 'vista', 'vision', 'ver', 'me duele el ojo'],
+    nivel: NIVELES.CONSULTA,
+    adonde: 'Consulta / urgencia oftalmológica según gravedad',
+    especialidad: 'Oftalmología',
+    especialidadesRequeridas: ['Oftalmología'],
+    alarma: [
+      'Pérdida súbita de visión → URGENCIA',
+      'Trauma del ojo o químico en el ojo → URGENCIA (lave con agua y acuda)',
+      'Dolor intenso con ojo rojo y visión borrosa → URGENCIA',
+    ],
+  },
+  {
+    nombre: 'Dolor de cabeza',
+    claves: ['cabeza', 'cefalea', 'migrana', 'jaqueca', 'me duele la cabeza'],
+    nivel: NIVELES.CONSULTA,
+    adonde: 'Consulta médica; urgencias si hay signos de alarma',
+    especialidad: 'Neurología',
+    especialidadesRequeridas: ['Neurología', 'Urgencias adultos'],
+    alarma: [
+      'El peor dolor de cabeza de su vida, de inicio súbito → EMERGENCIA',
+      'Con fiebre y rigidez de cuello → URGENCIA',
+      'Con debilidad, visión doble o confusión → EMERGENCIA',
+    ],
+  },
+  {
+    nombre: 'Dolor abdominal',
+    claves: ['abdomen', 'barriga', 'estomago', 'panza', 'vientre', 'me duele el estomago'],
+    nivel: NIVELES.CONSULTA,
+    adonde: 'Consulta; urgencias si el dolor es intenso o persistente',
+    especialidad: 'Medicina general / Cirugía',
+    especialidadesRequeridas: ['Cirugía general', 'Medicina interna'],
+    alarma: [
+      'Dolor intenso y continuo, abdomen duro → URGENCIA',
+      'Vómito con sangre o heces negras → URGENCIA',
+      'Dolor en parte baja derecha con fiebre (posible apendicitis) → URGENCIA',
+    ],
+  },
+  {
+    nombre: 'Fiebre',
+    claves: ['fiebre', 'calentura', 'temperatura', 'febril'],
+    nivel: NIVELES.AUTOCUIDADO,
+    adonde: 'Autocuidado; consulta si persiste o hay signos de alarma',
+    especialidad: 'Medicina general',
+    especialidadesRequeridas: ['Medicina general', 'Medicina interna'],
+    alarma: [
+      'Fiebre con dificultad para respirar o confusión → URGENCIA',
+      'Bebé menor de 3 meses con fiebre → URGENCIA',
+      'Fiebre con manchas en la piel que no desaparecen al presionar → EMERGENCIA',
+    ],
+  },
+  {
+    nombre: 'Dolor de muela / boca',
+    claves: ['muela', 'diente', 'dientes', 'boca', 'encia', 'odontologia'],
+    nivel: NIVELES.CONSULTA,
+    adonde: 'Consulta odontológica',
+    especialidad: 'Odontología',
+    especialidadesRequeridas: ['Cirugía maxilofacial / reconstructiva', 'Urgencias adultos'],
+    alarma: ['Hinchazón de cara/cuello con fiebre y dificultad para tragar o respirar → URGENCIA'],
+  },
+  {
+    nombre: 'Dolor de oído',
+    claves: ['oido', 'oreja', 'otitis', 'me duele el oido'],
+    nivel: NIVELES.CONSULTA,
+    adonde: 'Consulta médica',
+    especialidad: 'Otorrinolaringología',
+    especialidadesRequeridas: ['Urgencias adultos', 'Medicina general'],
+    alarma: ['Dolor intenso con fiebre alta, hinchazón detrás de la oreja → URGENCIA'],
+  },
+  {
+    nombre: 'Golpe en la cabeza (trauma)',
+    claves: ['golpe', 'trauma', 'cabeza golpe', 'caida', 'accidente'],
+    nivel: NIVELES.URGENCIA,
+    adonde: 'Urgencias',
+    especialidad: 'Urgencias / Neurocirugía',
+    especialidadesRequeridas: ['Neurocirugía', 'Urgencias adultos'],
+    alarma: [
+      'Pérdida de conocimiento, vómito o confusión → EMERGENCIA',
+      'Salida de líquido o sangre por nariz/oídos → EMERGENCIA',
+    ],
+  },
+  {
+    nombre: 'Síntomas en el embarazo',
+    claves: ['embarazo', 'embarazada', 'gestacion', 'bebe', 'parto'],
+    nivel: NIVELES.URGENCIA,
+    adonde: 'Urgencias de ginecobstetricia',
+    especialidad: 'Ginecobstetricia',
+    especialidadesRequeridas: ['Urgencias gineco-obstétricas', 'Ginecología y obstetricia'],
+    alarma: [
+      'Sangrado vaginal abundante → URGENCIA',
+      'Dolor de cabeza fuerte, visión borrosa o hinchazón súbita → URGENCIA (preeclampsia)',
+      'Disminución de movimientos del bebé → URGENCIA',
+    ],
+  },
+];
+
+/* Especialidades: cuándo acudir a cada una */
+const ESPECIALIDADES = [
+  { nombre: 'Cardiología', motivo: 'Dolor de pecho, palpitaciones, presión alta descontrolada, falta de aire al esfuerzo.' },
+  { nombre: 'Neurología', motivo: 'Signos de ACV, convulsiones, dolor de cabeza con alarma, debilidad o adormecimiento.' },
+  { nombre: 'Neumología', motivo: 'Dificultad para respirar, EPOC descompensada, asma severa.' },
+  { nombre: 'Ginecobstetricia', motivo: 'Urgencias del embarazo, sangrado vaginal abundante, dolor pélvico intenso.' },
+  { nombre: 'Pediatría', motivo: 'Niños con fiebre y mal estado, dificultad para respirar, deshidratación.' },
+  { nombre: 'Oftalmología', motivo: 'Pérdida de visión, trauma o químico en el ojo, ojo rojo doloroso.' },
+  { nombre: 'Otorrinolaringología', motivo: 'Oído, nariz y garganta: dolor intenso, sangrado nasal que no cede, cuerpos extraños.' },
+  { nombre: 'Gastroenterología', motivo: 'Sangrado digestivo, dolor abdominal persistente, enfermedad del hígado.' },
+  { nombre: 'Urología / Nefrología', motivo: 'Infección urinaria complicada, no poder orinar, cólico renal, falla renal.' },
+  { nombre: 'Ortopedia / Traumatología', motivo: 'Fracturas, luxaciones, trauma de extremidades.' },
+];
+
+/* Línea de emergencias de Colombia */
+const EMERGENCIA_TEL = '123';
+
+</script>
+  <script>
+/**
+ * hospitales.js — Red pública de la SUBRED INTEGRADA DE SERVICIOS DE SALUD NORTE E.S.E. (Bogotá)
+ *
+ * Localidades cubiertas con sede de urgencias: Usaquén, Chapinero, Suba, Engativá, Barrios Unidos.
+ * (Teusaquillo queda fuera por tener solo sede administrativa — ver REGLA DE INCLUSIÓN.)
+ *
+ * FUENTES (consultadas 2025–2026):
+ * - Subred Norte E.S.E. — subrednorte.gov.co (directorio, portafolio, call center 601 4431790).
+ * - Alcaldía de Bogotá — bogota.gov.co (niveles de complejidad, servicios y especialidades).
+ * - Capital Salud EPS — capitalsalud.gov.co (red de urgencias zona norte).
+ *
+ * ⚠️ VERACIDAD DE LAS ESPECIALIDADES:
+ * El listado de "especialidades" por sede se basa en notas de prensa y comunicados oficiales,
+ * NO en el portafolio detallado (PDF no accesible automáticamente). Cada sede trae
+ * "datosVerificados": true/false. Donde es false, CONFIRME en subrednorte.gov.co o al 601 4431790
+ * antes de usar con pacientes reales. Ante emergencia, llame al 123.
+ *
+ * Campos:
+ * - urgencias24h: boolean — si tiene servicio de urgencias 24 horas.
+ * - horarioUrgencias: texto del horario del servicio de urgencias.
+ * - especialidades: array de especialidades de urgencia disponibles (orientativo).
+ */
+
+const SUBRED = {
+  nombre: 'Subred Integrada de Servicios de Salud Norte E.S.E.',
+  callcenter: '601 4431790',
+  web: 'https://www.subrednorte.gov.co',
+  localidades: ['Usaquén', 'Chapinero', 'Suba', 'Engativá', 'Barrios Unidos'],
+};
+
+const HOSPITALES = [
+  {
+    id: 'simon-bolivar',
+    nombre: 'Hospital Simón Bolívar',
+    localidad: 'Usaquén',
+    nivel: 'III',
+    nivelTexto: 'Nivel III — alta complejidad',
+    direccion: 'Calle 165 # 7-06',
+    urgencias24h: true,
+    horarioUrgencias: 'Urgencias 24 horas, todos los días',
+    especialidades: [
+      'Urgencias adultos',
+      'Medicina interna',
+      'Cirugía general',
+      'Ortopedia y traumatología',
+      'Neurocirugía',
+      'Neurología',
+      'Anestesiología',
+      'Cirugía maxilofacial / reconstructiva',
+      'Unidad de quemados (referencia nacional)',
+      'UCI (incluida UCI neurológica)',
+    ],
+    datosVerificados: true,
+    tel: '601 4431790',
+    maps: 'https://www.google.com/maps/search/?api=1&query=Hospital+Sim%C3%B3n+Bol%C3%ADvar+Bogot%C3%A1',
+    nota: 'Mayor complejidad de la Subred Norte. Recibe urgencias graves (trauma, quemados, neuro) de toda la zona.',
+  },
+  {
+    id: 'engativa',
+    nombre: 'Hospital de Engativá',
+    localidad: 'Engativá',
+    nivel: 'II',
+    nivelTexto: 'Nivel II — mediana complejidad',
+    direccion: 'Transversal 100A # 80A-50',
+    urgencias24h: true,
+    horarioUrgencias: 'Urgencias 24 horas (adultos y pediátricas)',
+    especialidades: [
+      'Urgencias adultos',
+      'Urgencias pediátricas',
+      'Medicina interna',
+      'Cirugía general',
+      'Ortopedia y traumatología',
+      'Ginecología y obstetricia',
+      'Pediatría',
+      'Anestesiología',
+      'UCI',
+    ],
+    datosVerificados: false,
+    tel: '601 4431790',
+    maps: 'https://www.google.com/maps/search/?api=1&query=Hospital+de+Engativ%C3%A1+Bogot%C3%A1',
+    nota: 'Urgencias de adultos y pediátricas para el noroccidente. Verifique especialidades en subrednorte.gov.co.',
+  },
+  {
+    id: 'suba',
+    nombre: 'Hospital de Suba',
+    localidad: 'Suba',
+    nivel: 'II',
+    nivelTexto: 'Nivel II — mediana complejidad',
+    direccion: 'Carrera 90 # 147-60',
+    urgencias24h: true,
+    horarioUrgencias: 'Urgencias 24 horas (adultos, pediátricas y obstétricas)',
+    especialidades: [
+      'Urgencias adultos',
+      'Urgencias pediátricas',
+      'Urgencias gineco-obstétricas',
+      'Ginecología y obstetricia',
+      'Alta dependencia obstétrica',
+      'Medicina interna',
+      'Cirugía general',
+      'Pediatría',
+      'Anestesiología',
+    ],
+    datosVerificados: false,
+    tel: '601 4431790',
+    maps: 'https://www.google.com/maps/search/?api=1&query=Hospital+de+Suba+Bogot%C3%A1',
+    nota: 'Única Unidad de Alta Dependencia Obstétrica de la red pública. Fuerte en urgencias del embarazo.',
+  },
+  {
+    id: 'chapinero',
+    nombre: 'USS San Luis (Chapinero)',
+    localidad: 'Chapinero',
+    nivel: 'I',
+    nivelTexto: 'Nivel I — baja complejidad',
+    direccion: 'Km 5 Vía La Calera',
+    urgencias24h: false,
+    horarioUrgencias: 'Lunes a domingo: 7:00 a. m. – 5:00 p. m.',
+    especialidades: ['Consulta prioritaria', 'Medicina general', 'Urgencia de baja complejidad'],
+    datosVerificados: false,
+    tel: '601 4431790',
+    maps: 'https://www.google.com/maps/search/?api=1&query=USS+San+Luis+Km+5+V%C3%ADa+La+Calera+Bogot%C3%A1',
+    nota: 'Horario diurno (no 24h). Ante signos de alarma, diríjase a Simón Bolívar o llame al 123.',
+  },
+  {
+    id: 'barrios-unidos',
+    nombre: 'USS Barrios Unidos (Sede Rionegro)',
+    localidad: 'Barrios Unidos',
+    nivel: 'I',
+    nivelTexto: 'Nivel I — baja complejidad',
+    direccion: 'Calle 94C # 57-40 (Sede Rionegro)',
+    urgencias24h: false,
+    horarioUrgencias: 'Consulte horario en subrednorte.gov.co',
+    especialidades: ['Consulta prioritaria', 'Medicina general', 'Servicios ambulatorios'],
+    datosVerificados: false,
+    tel: '601 4431790',
+    maps: 'https://www.google.com/maps/search/?api=1&query=Subred+Norte+Rionegro+Barrios+Unidos+Bogot%C3%A1',
+    nota: 'Baja complejidad. Urgencias graves: Simón Bolívar / Engativá o 123.',
+  },
+];
+
+/*
+ * REGLA DE INCLUSIÓN (Opción B):
+ * Solo se listan sedes que atienden ALGÚN tipo de urgencias (incluida baja complejidad).
+ * Las sedes puramente administrativas se EXCLUYEN.
+ * Excluida: Sede Central / administrativa Teusaquillo (Calle 66 # 15-41) — sin urgencias.
+ */
+
+/**
+ * Devuelve las sedes que ofrecen una especialidad dada (coincidencia por texto).
+ * Ordena primero las de urgencias 24h y mayor nivel.
+ */
+function hospitalesConEspecialidad(nombreEspecialidad) {
+  const needle = (nombreEspecialidad || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+  const nivelPeso = { III: 3, II: 2, I: 1 };
+  return HOSPITALES.filter(function (h) {
+    return h.especialidades.some(function (e) {
+      const hay = e.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      return hay.includes(needle);
+    });
+  }).sort(function (a, b) {
+    if (a.urgencias24h !== b.urgencias24h) return b.urgencias24h - a.urgencias24h;
+    return (nivelPeso[b.nivel] || 0) - (nivelPeso[a.nivel] || 0);
+  });
+}
+
+</script>
+  <script>
+/* app.js — Lógica de la app. Usa los datos de data.js. */
+
+(function () {
+  'use strict';
+
+  /* ---------- Utilidades ---------- */
+
+  // Normaliza: minúsculas y sin tildes, para que "visión" ≈ "vision".
+  function norm(texto) {
+    return (texto || '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .trim();
+  }
+
+  function el(tag, className, html) {
+    const n = document.createElement(tag);
+    if (className) n.className = className;
+    if (html != null) n.innerHTML = html;
+    return n;
+  }
+
+  function badge(nivel) {
+    const b = el('span', 'badge', nivel.titulo);
+    b.style.background = nivel.color;
+    return b;
+  }
+
+  /* ---------- Navegación por pestañas ---------- */
+
+  function initTabs() {
+    const tabs = document.querySelectorAll('.tab');
+    tabs.forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        const target = tab.getAttribute('data-tab');
+        tabs.forEach((t) => t.classList.remove('tab--active'));
+        tab.classList.add('tab--active');
+        document.querySelectorAll('.panel').forEach(function (p) {
+          p.classList.toggle('panel--active', p.id === 'tab-' + target);
+        });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    });
+  }
+
+  /* ---------- Buscador de síntomas ---------- */
+
+  function buscarSintomas(consulta) {
+    const q = norm(consulta);
+    if (!q) return [];
+    return SINTOMAS.filter(function (s) {
+      if (norm(s.nombre).includes(q)) return true;
+      return s.claves.some(function (clave) {
+        const k = norm(clave);
+        return k.includes(q) || q.includes(k);
+      });
+    });
+  }
+
+  function tarjetaSintoma(s) {
+    const card = el('article', 'card');
+    card.style.borderLeftColor = s.nivel.color;
+
+    const head = el('div', 'card__head');
+    head.appendChild(el('h2', 'card__title', s.nombre));
+    head.appendChild(badge(s.nivel));
+    card.appendChild(head);
+
+    card.appendChild(el('p', 'card__adonde', '➡️ ' + s.adonde));
+    card.appendChild(el('p', 'card__meta', 'Especialidad: ' + s.especialidad));
+    card.appendChild(el('p', 'card__nivelmsg', s.nivel.mensaje));
+
+    if (s.alarma && s.alarma.length) {
+      card.appendChild(el('p', 'alarma-titulo', '⚠️ Signos de alarma — vaya a urgencias / 123:'));
+      const ul = el('ul', 'alarma-lista');
+      s.alarma.forEach((a) => ul.appendChild(el('li', null, a)));
+      card.appendChild(ul);
+    }
+
+    // Razón: especialidades que requiere esta urgencia.
+    if (s.especialidadesRequeridas && s.especialidadesRequeridas.length) {
+      card.appendChild(
+        el('p', 'card__meta', '🩺 Por qué: requiere ' + s.especialidadesRequeridas.join(', '))
+      );
+    }
+
+    // Sedes de la Subred Norte que atienden esta urgencia (con esa especialidad).
+    const sedes = sedesParaSintoma(s);
+    if (sedes.length) {
+      const box = el('div', 'sede-sugerida');
+      box.appendChild(el('p', 'sede-sugerida__titulo', '📍 A dónde ir (Subred Norte):'));
+      sedes.forEach(function (sede) {
+        const row = el('div', 'sede-sugerida__item');
+        const txt =
+          '<strong>' + sede.nombre + '</strong> — ' + sede.localidad +
+          ', ' + sede.direccion +
+          (sede.urgencias24h ? ' · 🚨 24h' : ' · 🕐 ' + (sede.horarioUrgencias || 'horario limitado'));
+        row.appendChild(el('span', null, txt));
+        const link = el('a', 'hosp__link', '🗺️');
+        link.href = sede.maps;
+        link.target = '_blank';
+        link.rel = 'noopener';
+        link.title = 'Cómo llegar';
+        row.appendChild(link);
+        box.appendChild(row);
+      });
+      card.appendChild(box);
+    }
+    return card;
+  }
+
+  // Devuelve las sedes que ofrecen alguna de las especialidades requeridas por el síntoma.
+  // Si ninguna coincide, cae a la sede de mayor complejidad (Simón Bolívar).
+  function sedesParaSintoma(s) {
+    const reqs = s.especialidadesRequeridas || [];
+    const encontradas = [];
+    reqs.forEach(function (esp) {
+      hospitalesConEspecialidad(esp).forEach(function (h) {
+        if (!encontradas.some((e) => e.id === h.id)) encontradas.push(h);
+      });
+    });
+    if (!encontradas.length) {
+      const sb = HOSPITALES.find((h) => h.id === 'simon-bolivar');
+      return sb ? [sb] : [];
+    }
+    // Máximo 3 sedes, priorizando 24h y mayor nivel.
+    const nivelPeso = { III: 3, II: 2, I: 1 };
+    return encontradas
+      .sort(function (a, b) {
+        if (a.urgencias24h !== b.urgencias24h) return b.urgencias24h - a.urgencias24h;
+        return (nivelPeso[b.nivel] || 0) - (nivelPeso[a.nivel] || 0);
+      })
+      .slice(0, 3);
+  }
+
+  function renderResultados(lista, hayConsulta) {
+    const cont = document.getElementById('resultados');
+    cont.innerHTML = '';
+
+    if (!hayConsulta) {
+      cont.appendChild(
+        el('p', 'empty', 'Escriba una molestia o toque uno de los síntomas frecuentes de arriba.')
+      );
+      return;
+    }
+    if (!lista.length) {
+      cont.appendChild(
+        el(
+          'p',
+          'empty',
+          'No encontramos ese síntoma en la guía. Si tiene dudas o la molestia es fuerte, acuda a urgencias o llame al 123.'
+        )
+      );
+      return;
+    }
+    lista.forEach((s) => cont.appendChild(tarjetaSintoma(s)));
+  }
+
+  function initBuscador() {
+    const input = document.getElementById('search-input');
+    const chips = document.getElementById('chips');
+
+    // Recuadros de acceso rápido: todos los motivos de consulta frecuentes.
+    SINTOMAS.forEach(function (s) {
+      const chip = el('button', 'chip', s.nombre);
+      chip.addEventListener('click', function () {
+        input.value = s.nombre;
+        renderResultados(buscarSintomas(s.nombre), true);
+        input.focus();
+      });
+      chips.appendChild(chip);
+    });
+
+    input.addEventListener('input', function () {
+      const v = input.value;
+      renderResultados(buscarSintomas(v), v.trim().length > 0);
+    });
+
+    renderResultados([], false);
+  }
+
+  /* ---------- ABC ---------- */
+
+  function initABC() {
+    const cont = document.getElementById('abc-list');
+    ABC.forEach(function (item) {
+      const card = el('div', 'abc-card');
+      const head = el('div', 'abc-card__head');
+      head.appendChild(el('div', 'abc-letra', item.letra));
+      head.appendChild(el('div', 'abc-card__nombre', item.nombre));
+      card.appendChild(head);
+
+      card.appendChild(el('p', 'abc-card__pregunta', item.pregunta));
+
+      card.appendChild(el('p', 'alarma-titulo', '⚠️ Signos de peligro:'));
+      const ul = el('ul', 'alarma-lista');
+      item.alarma.forEach((a) => ul.appendChild(el('li', null, a)));
+      card.appendChild(ul);
+
+      card.appendChild(el('p', 'card__nivelmsg', item.accion));
+      cont.appendChild(card);
+    });
+  }
+
+  /* ---------- Causas de mortalidad (acordeón) ---------- */
+
+  function initCausas() {
+    const cont = document.getElementById('causas-list');
+    CAUSAS_MORTALIDAD.forEach(function (c) {
+      const wrap = el('div', 'causa');
+
+      const head = el('div', 'causa__head');
+      head.appendChild(el('div', 'causa__puesto', String(c.puesto)));
+      head.appendChild(el('div', 'causa__nombre', c.nombre));
+      head.appendChild(el('div', 'causa__toggle', '▾'));
+      wrap.appendChild(head);
+
+      const body = el('div', 'causa__body');
+      body.appendChild(el('p', 'causa__quees', c.quees));
+
+      const bHead = el('div', 'card__head');
+      bHead.appendChild(el('span', null, '<strong>¿A dónde?</strong> ' + c.especialidad));
+      bHead.appendChild(badge(c.nivel));
+      body.appendChild(bHead);
+
+      body.appendChild(el('p', 'alarma-titulo', '⚠️ Signos de alarma:'));
+      const ul = el('ul', 'alarma-lista');
+      c.alarma.forEach((a) => ul.appendChild(el('li', null, a)));
+      body.appendChild(ul);
+
+      if (c.nota) body.appendChild(el('p', 'causa__nota', 'ℹ️ ' + c.nota));
+
+      wrap.appendChild(body);
+
+      head.addEventListener('click', function () {
+        wrap.classList.toggle('causa--open');
+        head.querySelector('.causa__toggle').textContent =
+          wrap.classList.contains('causa--open') ? '▴' : '▾';
+      });
+
+      cont.appendChild(wrap);
+    });
+  }
+
+  /* ---------- Hospitales (Subred Norte) ---------- */
+
+  function tarjetaHospital(h) {
+    const card = el('article', 'card hosp');
+    card.style.borderLeftColor = h.urgencias24h ? '#c0392b' : '#2980b9';
+
+    const head = el('div', 'card__head');
+    head.appendChild(el('h2', 'card__title', h.nombre));
+    const tag = el('span', 'badge');
+    if (h.urgencias24h) {
+      tag.textContent = '🚨 Urgencias 24h';
+      tag.style.background = '#c0392b';
+    } else {
+      tag.textContent = 'Baja complejidad';
+      tag.style.background = '#2980b9';
+    }
+    head.appendChild(tag);
+    card.appendChild(head);
+
+    card.appendChild(el('p', 'card__meta', '📍 ' + h.localidad + ' — ' + h.direccion));
+    card.appendChild(el('p', 'card__meta', 'Complejidad: ' + h.nivelTexto));
+    if (h.horario) card.appendChild(el('p', 'card__meta', '🕐 ' + h.horario));
+    card.appendChild(el('p', 'card__meta', 'Atiende: ' + h.urgencias.join(', ')));
+    if (h.nota) card.appendChild(el('p', 'causa__nota', 'ℹ️ ' + h.nota));
+
+    const acciones = el('div', 'hosp__acciones');
+    const tel = el('a', 'hosp__btn', '📞 ' + h.tel);
+    tel.href = 'tel:' + h.tel.replace(/\s/g, '');
+    const mapa = el('a', 'hosp__btn hosp__btn--ghost', '🗺️ Cómo llegar');
+    mapa.href = h.maps;
+    mapa.target = '_blank';
+    mapa.rel = 'noopener';
+    acciones.appendChild(tel);
+    acciones.appendChild(mapa);
+    card.appendChild(acciones);
+
+    return card;
+  }
+
+  function renderHospitales(localidad) {
+    const cont = document.getElementById('hospitales-list');
+    cont.innerHTML = '';
+    let lista = HOSPITALES;
+    if (localidad && localidad !== 'todas') {
+      lista = HOSPITALES.filter((h) => h.localidad === localidad);
+    }
+    // Mostrar primero las sedes con urgencias 24h.
+    lista = lista.slice().sort((a, b) => (b.urgencias24h === true) - (a.urgencias24h === true));
+
+    if (!lista.length) {
+      cont.appendChild(el('p', 'empty', 'No hay sedes registradas para esa localidad.'));
+      return;
+    }
+    lista.forEach((h) => cont.appendChild(tarjetaHospital(h)));
+  }
+
+  function initHospitales() {
+    const select = document.getElementById('loc-select');
+    // Solo localidades que tienen al menos una sede con atención de urgencias.
+    const localidadesConSede = [...new Set(HOSPITALES.map((h) => h.localidad))].sort();
+    localidadesConSede.forEach(function (loc) {
+      const opt = el('option', null, loc);
+      opt.value = loc;
+      select.appendChild(opt);
+    });
+    select.addEventListener('change', function () {
+      renderHospitales(select.value);
+    });
+    renderHospitales('todas');
+  }
+
+  /* ---------- Especialidades ---------- */
+
+  function initEspecialidades() {
+    const cont = document.getElementById('especialidades-list');
+    ESPECIALIDADES.forEach(function (e) {
+      const card = el('div', 'esp');
+      card.appendChild(el('div', 'esp__nombre', e.nombre));
+      card.appendChild(el('div', 'esp__motivo', e.motivo));
+      cont.appendChild(card);
+    });
+  }
+
+  /* ---------- Arranque ---------- */
+
+  document.addEventListener('DOMContentLoaded', function () {
+    initTabs();
+    initBuscador();
+    initABC();
+    initHospitales();
+    initCausas();
+    initEspecialidades();
+  });
+})();
+
+</script>
+</body>
+</html>
