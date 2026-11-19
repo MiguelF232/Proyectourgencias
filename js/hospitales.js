@@ -64,21 +64,26 @@ const HOSPITALES = [
     direccion: 'Transversal 100A # 80A-50',
     urgencias24h: true,
     horarioUrgencias: 'Urgencias 24 horas (adultos y pediátricas)',
+    // Confirmadas: fuentes oficiales + confirmación del equipo (cirugía general).
     especialidades: [
       'Urgencias adultos',
       'Urgencias pediátricas',
+      'Pediatría',
       'Medicina interna',
       'Cirugía general',
-      'Ortopedia y traumatología',
-      'Ginecología y obstetricia',
-      'Pediatría',
-      'Anestesiología',
+      'Hospitalización',
       'UCI',
     ],
-    datosVerificados: false,
+    // Por confirmar para el Hospital de Engativá (aparecen en CAPS de la zona, no verificadas en el hospital).
+    especialidadesPorConfirmar: [
+      'Ortopedia y traumatología',
+      'Ginecología y obstetricia',
+      'Anestesiología',
+    ],
+    datosVerificados: true,
     tel: '601 4431790',
     maps: 'https://www.google.com/maps/search/?api=1&query=Hospital+de+Engativ%C3%A1+Bogot%C3%A1',
-    nota: 'Urgencias de adultos y pediátricas para el noroccidente. Verifique especialidades en subrednorte.gov.co.',
+    nota: 'Urgencias 24h de adultos y pediátricas (noroccidente). Cirugía, ortopedia, gineco y anestesia: por confirmar.',
   },
   {
     id: 'suba',
@@ -153,14 +158,22 @@ function hospitalesConEspecialidad(nombreEspecialidad) {
     .toLowerCase()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '');
+  const match = (e) =>
+    e.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').includes(needle);
   const nivelPeso = { III: 3, II: 2, I: 1 };
-  return HOSPITALES.filter(function (h) {
-    return h.especialidades.some(function (e) {
-      const hay = e.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-      return hay.includes(needle);
-    });
-  }).sort(function (a, b) {
-    if (a.urgencias24h !== b.urgencias24h) return b.urgencias24h - a.urgencias24h;
-    return (nivelPeso[b.nivel] || 0) - (nivelPeso[a.nivel] || 0);
+  const res = [];
+  HOSPITALES.forEach(function (h) {
+    if (h.especialidades.some(match)) {
+      res.push({ hospital: h, confirmado: true });
+    } else if ((h.especialidadesPorConfirmar || []).some(match)) {
+      res.push({ hospital: h, confirmado: false });
+    }
+  });
+  // Confirmados primero; luego 24h; luego mayor nivel.
+  return res.sort(function (a, b) {
+    if (a.confirmado !== b.confirmado) return b.confirmado - a.confirmado;
+    if (a.hospital.urgencias24h !== b.hospital.urgencias24h)
+      return b.hospital.urgencias24h - a.hospital.urgencias24h;
+    return (nivelPeso[b.hospital.nivel] || 0) - (nivelPeso[a.hospital.nivel] || 0);
   });
 }

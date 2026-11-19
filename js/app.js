@@ -14,6 +14,28 @@
       .trim();
   }
 
+  // Localidad seleccionada por el usuario (lógica simple, sin GPS).
+  let userLocalidad = '';
+
+  // Cercanía aproximada entre localidades de la Subred Norte (orden de preferencia).
+  // Para cada localidad, lista las localidades vecinas de más cerca a más lejos.
+  const VECINDAD = {
+    'Usaquén': ['Usaquén', 'Chapinero', 'Suba', 'Barrios Unidos', 'Engativá'],
+    'Chapinero': ['Chapinero', 'Usaquén', 'Barrios Unidos', 'Suba', 'Engativá'],
+    'Suba': ['Suba', 'Usaquén', 'Engativá', 'Barrios Unidos', 'Chapinero'],
+    'Engativá': ['Engativá', 'Suba', 'Barrios Unidos', 'Usaquén', 'Chapinero'],
+    'Barrios Unidos': ['Barrios Unidos', 'Chapinero', 'Engativá', 'Usaquén', 'Suba'],
+  };
+
+  // Puntaje de cercanía: menor = más cerca. 99 si no hay info.
+  function cercania(localidadSede) {
+    if (!userLocalidad) return 0; // sin preferencia
+    const orden = VECINDAD[userLocalidad];
+    if (!orden) return 99;
+    const idx = orden.indexOf(localidadSede);
+    return idx === -1 ? 99 : idx;
+  }
+
   function el(tag, className, html) {
     const n = document.createElement(tag);
     if (className) n.className = className;
@@ -90,10 +112,15 @@
     if (sedes.length) {
       const box = el('div', 'sede-sugerida');
       box.appendChild(el('p', 'sede-sugerida__titulo', '📍 A dónde ir (Subred Norte):'));
-      sedes.forEach(function (sede) {
+      sedes.forEach(function (item) {
+        const sede = item.hospital;
         const row = el('div', 'sede-sugerida__item');
+        const enTuLoc = userLocalidad && sede.localidad === userLocalidad;
         const txt =
-          '<strong>' + sede.nombre + '</strong> — ' + sede.localidad +
+          '<strong>' + sede.nombre + '</strong>' +
+          (enTuLoc ? ' <span class="tag-cerca">📍 en tu localidad</span>' : '') +
+          (!item.confirmado ? ' <span class="tag-check">⚠️ especialidad por confirmar</span>' : '') +
+          ' — ' + sede.localidad +
           ', ' + sede.direccion +
           (sede.urgencias24h ? ' · 🚨 24h' : ' · 🕐 ' + (sede.horarioUrgencias || 'horario limitado'));
         row.appendChild(el('span', null, txt));
@@ -114,22 +141,29 @@
   // Si ninguna coincide, cae a la sede de mayor complejidad (Simón Bolívar).
   function sedesParaSintoma(s) {
     const reqs = s.especialidadesRequeridas || [];
-    const encontradas = [];
+    const encontradas = []; // { hospital, confirmado }
     reqs.forEach(function (esp) {
-      hospitalesConEspecialidad(esp).forEach(function (h) {
-        if (!encontradas.some((e) => e.id === h.id)) encontradas.push(h);
+      hospitalesConEspecialidad(esp).forEach(function (r) {
+        const prev = encontradas.find((e) => e.hospital.id === r.hospital.id);
+        if (!prev) encontradas.push(r);
+        else if (r.confirmado) prev.confirmado = true; // si alguna req lo confirma, vale
       });
     });
     if (!encontradas.length) {
       const sb = HOSPITALES.find((h) => h.id === 'simon-bolivar');
-      return sb ? [sb] : [];
+      return sb ? [{ hospital: sb, confirmado: false }] : [];
     }
-    // Máximo 3 sedes, priorizando 24h y mayor nivel.
+    // Orden: 1) confirmado, 2) cercanía a la localidad del usuario, 3) 24h, 4) mayor nivel.
     const nivelPeso = { III: 3, II: 2, I: 1 };
     return encontradas
       .sort(function (a, b) {
-        if (a.urgencias24h !== b.urgencias24h) return b.urgencias24h - a.urgencias24h;
-        return (nivelPeso[b.nivel] || 0) - (nivelPeso[a.nivel] || 0);
+        if (a.confirmado !== b.confirmado) return b.confirmado - a.confirmado;
+        const ca = cercania(a.hospital.localidad);
+        const cb = cercania(b.hospital.localidad);
+        if (ca !== cb) return ca - cb;
+        if (a.hospital.urgencias24h !== b.hospital.urgencias24h)
+          return b.hospital.urgencias24h - a.hospital.urgencias24h;
+        return (nivelPeso[b.hospital.nivel] || 0) - (nivelPeso[a.hospital.nivel] || 0);
       })
       .slice(0, 3);
   }
@@ -160,6 +194,21 @@
   function initBuscador() {
     const input = document.getElementById('search-input');
     const chips = document.getElementById('chips');
+    const userLoc = document.getElementById('user-loc');
+
+    // Poblar el selector de localidad del usuario con las localidades que tienen sede.
+    const locs = [...new Set(HOSPITALES.map((h) => h.localidad))].sort();
+    locs.forEach(function (loc) {
+      const opt = el('option', null, loc);
+      opt.value = loc;
+      userLoc.appendChild(opt);
+    });
+    userLoc.addEventListener('change', function () {
+      userLocalidad = userLoc.value;
+      // Re-renderizar resultados con el nuevo orden por cercanía.
+      const v = input.value;
+      renderResultados(buscarSintomas(v), v.trim().length > 0);
+    });
 
     // Recuadros de acceso rápido: todos los motivos de consulta frecuentes.
     SINTOMAS.forEach(function (s) {
