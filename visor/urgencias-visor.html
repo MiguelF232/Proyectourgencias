@@ -118,7 +118,19 @@ body {
 }
 .search__input:focus { outline: none; border-color: var(--azul); }
 
-.chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 18px; }
+.chips { margin: 12px 0 18px; }
+.chip-grupo { margin-bottom: 16px; }
+.chip-grupo__titulo {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--gris);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin: 0 0 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--borde);
+}
+.chip-grupo__chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .chip {
   border: 1px solid var(--borde);
   background: #fff;
@@ -622,6 +634,7 @@ const CAUSAS_MORTALIDAD = [
 const SINTOMAS = [
   {
     nombre: 'Dolor en el pecho',
+    categoria: 'cardio_resp',
     claves: ['pecho', 'corazon', 'infarto', 'opresion', 'dolor en el pecho'],
     nivel: NIVELES.EMERGENCIA,
     adonde: 'Urgencias de inmediato / llame al 123',
@@ -631,6 +644,7 @@ const SINTOMAS = [
   },
   {
     nombre: 'Dificultad para respirar',
+    categoria: 'cardio_resp',
     claves: ['respirar', 'ahogo', 'falta de aire', 'asfixia', 'no puedo respirar'],
     nivel: NIVELES.EMERGENCIA,
     adonde: 'Urgencias de inmediato / llame al 123',
@@ -640,6 +654,7 @@ const SINTOMAS = [
   },
   {
     nombre: 'Me fracturé / hueso roto',
+    categoria: 'osteomuscular',
     claves: ['fractura', 'fracture', 'hueso', 'quebre', 'me quebre', 'roto', 'luxacion', 'esguince'],
     nivel: NIVELES.URGENCIA,
     adonde: 'Urgencias con ortopedia',
@@ -653,6 +668,7 @@ const SINTOMAS = [
   },
   {
     nombre: 'Dolor / lesión en manos o brazos',
+    categoria: 'osteomuscular',
     claves: ['mano', 'manos', 'brazo', 'brazos', 'muneca', 'dedo', 'dedos', 'codo'],
     nivel: NIVELES.URGENCIA,
     adonde: 'Urgencias con ortopedia',
@@ -666,6 +682,7 @@ const SINTOMAS = [
   },
   {
     nombre: 'Dolor de ojo / problema de visión',
+    categoria: 'sentidos',
     claves: ['ojo', 'ojos', 'vista', 'vision', 'ver', 'me duele el ojo'],
     nivel: NIVELES.CONSULTA,
     adonde: 'Consulta / urgencia oftalmológica según gravedad',
@@ -679,6 +696,7 @@ const SINTOMAS = [
   },
   {
     nombre: 'Dolor de cabeza',
+    categoria: 'neurologica',
     claves: ['cabeza', 'cefalea', 'migrana', 'jaqueca', 'me duele la cabeza'],
     nivel: NIVELES.CONSULTA,
     adonde: 'Consulta médica; urgencias si hay signos de alarma',
@@ -692,6 +710,7 @@ const SINTOMAS = [
   },
   {
     nombre: 'Dolor abdominal',
+    categoria: 'gastrointestinal',
     claves: ['abdomen', 'barriga', 'estomago', 'panza', 'vientre', 'me duele el estomago'],
     nivel: NIVELES.CONSULTA,
     adonde: 'Consulta; urgencias si el dolor es intenso o persistente',
@@ -705,6 +724,7 @@ const SINTOMAS = [
   },
   {
     nombre: 'Fiebre',
+    categoria: 'general',
     claves: ['fiebre', 'calentura', 'temperatura', 'febril'],
     nivel: NIVELES.AUTOCUIDADO,
     adonde: 'Autocuidado; consulta si persiste o hay signos de alarma',
@@ -718,6 +738,7 @@ const SINTOMAS = [
   },
   {
     nombre: 'Dolor de muela / boca',
+    categoria: 'sentidos',
     claves: ['muela', 'diente', 'dientes', 'boca', 'encia', 'odontologia'],
     nivel: NIVELES.CONSULTA,
     adonde: 'Consulta odontológica',
@@ -727,6 +748,7 @@ const SINTOMAS = [
   },
   {
     nombre: 'Dolor de oído',
+    categoria: 'sentidos',
     claves: ['oido', 'oreja', 'otitis', 'me duele el oido'],
     nivel: NIVELES.CONSULTA,
     adonde: 'Consulta médica',
@@ -736,6 +758,7 @@ const SINTOMAS = [
   },
   {
     nombre: 'Golpe en la cabeza (trauma)',
+    categoria: 'neurologica',
     claves: ['golpe', 'trauma', 'cabeza golpe', 'caida', 'accidente'],
     nivel: NIVELES.URGENCIA,
     adonde: 'Urgencias',
@@ -748,6 +771,7 @@ const SINTOMAS = [
   },
   {
     nombre: 'Síntomas en el embarazo',
+    categoria: 'gineco',
     claves: ['embarazo', 'embarazada', 'gestacion', 'bebe', 'parto'],
     nivel: NIVELES.URGENCIA,
     adonde: 'Urgencias de ginecobstetricia',
@@ -759,6 +783,20 @@ const SINTOMAS = [
       'Disminución de movimientos del bebé → URGENCIA',
     ],
   },
+];
+
+/**
+ * CATEGORÍAS por sistema/aparato para agrupar los síntomas en la búsqueda.
+ * El campo "orden" controla cómo se muestran (más urgente/vital primero).
+ */
+const CATEGORIAS = [
+  { id: 'cardio_resp', etiqueta: 'Cardiovascular / Respiratoria', emoji: '❤️', orden: 1 },
+  { id: 'neurologica', etiqueta: 'Neurológica', emoji: '🧠', orden: 2 },
+  { id: 'osteomuscular', etiqueta: 'Osteomuscular / Trauma', emoji: '🦴', orden: 3 },
+  { id: 'gastrointestinal', etiqueta: 'Gastrointestinal', emoji: '🍽️', orden: 4 },
+  { id: 'gineco', etiqueta: 'Gineco-obstétrica', emoji: '🤰', orden: 5 },
+  { id: 'sentidos', etiqueta: 'Ojos, oído y boca', emoji: '👁️', orden: 6 },
+  { id: 'general', etiqueta: 'General / Infecciosa', emoji: '🌡️', orden: 7 },
 ];
 
 /* Especialidades: cuándo acudir a cada una */
@@ -1155,6 +1193,50 @@ function hospitalesConEspecialidad(nombreEspecialidad) {
     lista.forEach((s) => cont.appendChild(tarjetaSintoma(s)));
   }
 
+  // Dibuja los recuadros de síntomas agrupados bajo un encabezado por categoría.
+  function renderChipsPorCategoria(contenedor, input) {
+    contenedor.innerHTML = '';
+    const cats = CATEGORIAS.slice().sort((a, b) => a.orden - b.orden);
+    cats.forEach(function (cat) {
+      const delCat = SINTOMAS.filter((s) => s.categoria === cat.id);
+      if (!delCat.length) return;
+
+      const grupo = el('div', 'chip-grupo');
+      grupo.appendChild(el('h3', 'chip-grupo__titulo', cat.emoji + ' ' + cat.etiqueta));
+      const fila = el('div', 'chip-grupo__chips');
+      delCat.forEach(function (s) {
+        const chip = el('button', 'chip', s.nombre);
+        chip.addEventListener('click', function () {
+          input.value = s.nombre;
+          renderResultados(buscarSintomas(s.nombre), true);
+          input.focus();
+        });
+        fila.appendChild(chip);
+      });
+      grupo.appendChild(fila);
+      contenedor.appendChild(grupo);
+    });
+
+    // Síntomas sin categoría (por si se agrega alguno nuevo sin asignar).
+    const sinCat = SINTOMAS.filter((s) => !CATEGORIAS.some((c) => c.id === s.categoria));
+    if (sinCat.length) {
+      const grupo = el('div', 'chip-grupo');
+      grupo.appendChild(el('h3', 'chip-grupo__titulo', '• Otros'));
+      const fila = el('div', 'chip-grupo__chips');
+      sinCat.forEach(function (s) {
+        const chip = el('button', 'chip', s.nombre);
+        chip.addEventListener('click', function () {
+          input.value = s.nombre;
+          renderResultados(buscarSintomas(s.nombre), true);
+          input.focus();
+        });
+        fila.appendChild(chip);
+      });
+      grupo.appendChild(fila);
+      contenedor.appendChild(grupo);
+    }
+  }
+
   function initBuscador() {
     const input = document.getElementById('search-input');
     const chips = document.getElementById('chips');
@@ -1174,16 +1256,8 @@ function hospitalesConEspecialidad(nombreEspecialidad) {
       renderResultados(buscarSintomas(v), v.trim().length > 0);
     });
 
-    // Recuadros de acceso rápido: todos los motivos de consulta frecuentes.
-    SINTOMAS.forEach(function (s) {
-      const chip = el('button', 'chip', s.nombre);
-      chip.addEventListener('click', function () {
-        input.value = s.nombre;
-        renderResultados(buscarSintomas(s.nombre), true);
-        input.focus();
-      });
-      chips.appendChild(chip);
-    });
+    // Recuadros de acceso rápido, agrupados por categoría (sistema/aparato).
+    renderChipsPorCategoria(chips, input);
 
     input.addEventListener('input', function () {
       const v = input.value;

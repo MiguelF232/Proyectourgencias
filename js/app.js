@@ -191,6 +191,50 @@
     lista.forEach((s) => cont.appendChild(tarjetaSintoma(s)));
   }
 
+  // Dibuja los recuadros de síntomas agrupados bajo un encabezado por categoría.
+  function renderChipsPorCategoria(contenedor, input) {
+    contenedor.innerHTML = '';
+    const cats = CATEGORIAS.slice().sort((a, b) => a.orden - b.orden);
+    cats.forEach(function (cat) {
+      const delCat = SINTOMAS.filter((s) => s.categoria === cat.id);
+      if (!delCat.length) return;
+
+      const grupo = el('div', 'chip-grupo');
+      grupo.appendChild(el('h3', 'chip-grupo__titulo', cat.emoji + ' ' + cat.etiqueta));
+      const fila = el('div', 'chip-grupo__chips');
+      delCat.forEach(function (s) {
+        const chip = el('button', 'chip', s.nombre);
+        chip.addEventListener('click', function () {
+          input.value = s.nombre;
+          renderResultados(buscarSintomas(s.nombre), true);
+          input.focus();
+        });
+        fila.appendChild(chip);
+      });
+      grupo.appendChild(fila);
+      contenedor.appendChild(grupo);
+    });
+
+    // Síntomas sin categoría (por si se agrega alguno nuevo sin asignar).
+    const sinCat = SINTOMAS.filter((s) => !CATEGORIAS.some((c) => c.id === s.categoria));
+    if (sinCat.length) {
+      const grupo = el('div', 'chip-grupo');
+      grupo.appendChild(el('h3', 'chip-grupo__titulo', '• Otros'));
+      const fila = el('div', 'chip-grupo__chips');
+      sinCat.forEach(function (s) {
+        const chip = el('button', 'chip', s.nombre);
+        chip.addEventListener('click', function () {
+          input.value = s.nombre;
+          renderResultados(buscarSintomas(s.nombre), true);
+          input.focus();
+        });
+        fila.appendChild(chip);
+      });
+      grupo.appendChild(fila);
+      contenedor.appendChild(grupo);
+    }
+  }
+
   function initBuscador() {
     const input = document.getElementById('search-input');
     const chips = document.getElementById('chips');
@@ -210,16 +254,8 @@
       renderResultados(buscarSintomas(v), v.trim().length > 0);
     });
 
-    // Recuadros de acceso rápido: todos los motivos de consulta frecuentes.
-    SINTOMAS.forEach(function (s) {
-      const chip = el('button', 'chip', s.nombre);
-      chip.addEventListener('click', function () {
-        input.value = s.nombre;
-        renderResultados(buscarSintomas(s.nombre), true);
-        input.focus();
-      });
-      chips.appendChild(chip);
-    });
+    // Recuadros de acceso rápido, agrupados por categoría (sistema/aparato).
+    renderChipsPorCategoria(chips, input);
 
     input.addEventListener('input', function () {
       const v = input.value;

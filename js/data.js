@@ -226,6 +226,7 @@ const CAUSAS_MORTALIDAD = [
 const SINTOMAS = [
   {
     nombre: 'Dolor en el pecho',
+    categoria: 'cardio_resp',
     claves: ['pecho', 'corazon', 'infarto', 'opresion', 'dolor en el pecho'],
     nivel: NIVELES.EMERGENCIA,
     adonde: 'Urgencias de inmediato / llame al 123',
@@ -235,6 +236,7 @@ const SINTOMAS = [
   },
   {
     nombre: 'Dificultad para respirar',
+    categoria: 'cardio_resp',
     claves: ['respirar', 'ahogo', 'falta de aire', 'asfixia', 'no puedo respirar'],
     nivel: NIVELES.EMERGENCIA,
     adonde: 'Urgencias de inmediato / llame al 123',
@@ -244,6 +246,7 @@ const SINTOMAS = [
   },
   {
     nombre: 'Me fracturé / hueso roto',
+    categoria: 'osteomuscular',
     claves: ['fractura', 'fracture', 'hueso', 'quebre', 'me quebre', 'roto', 'luxacion', 'esguince'],
     nivel: NIVELES.URGENCIA,
     adonde: 'Urgencias con ortopedia',
@@ -257,6 +260,7 @@ const SINTOMAS = [
   },
   {
     nombre: 'Dolor / lesión en manos o brazos',
+    categoria: 'osteomuscular',
     claves: ['mano', 'manos', 'brazo', 'brazos', 'muneca', 'dedo', 'dedos', 'codo'],
     nivel: NIVELES.URGENCIA,
     adonde: 'Urgencias con ortopedia',
@@ -270,6 +274,7 @@ const SINTOMAS = [
   },
   {
     nombre: 'Dolor de ojo / problema de visión',
+    categoria: 'sentidos',
     claves: ['ojo', 'ojos', 'vista', 'vision', 'ver', 'me duele el ojo'],
     nivel: NIVELES.CONSULTA,
     adonde: 'Consulta / urgencia oftalmológica según gravedad',
@@ -283,6 +288,7 @@ const SINTOMAS = [
   },
   {
     nombre: 'Dolor de cabeza',
+    categoria: 'neurologica',
     claves: ['cabeza', 'cefalea', 'migrana', 'jaqueca', 'me duele la cabeza'],
     nivel: NIVELES.CONSULTA,
     adonde: 'Consulta médica; urgencias si hay signos de alarma',
@@ -296,6 +302,7 @@ const SINTOMAS = [
   },
   {
     nombre: 'Dolor abdominal',
+    categoria: 'gastrointestinal',
     claves: ['abdomen', 'barriga', 'estomago', 'panza', 'vientre', 'me duele el estomago'],
     nivel: NIVELES.CONSULTA,
     adonde: 'Consulta; urgencias si el dolor es intenso o persistente',
@@ -309,6 +316,7 @@ const SINTOMAS = [
   },
   {
     nombre: 'Fiebre',
+    categoria: 'general',
     claves: ['fiebre', 'calentura', 'temperatura', 'febril'],
     nivel: NIVELES.AUTOCUIDADO,
     adonde: 'Autocuidado; consulta si persiste o hay signos de alarma',
@@ -322,6 +330,7 @@ const SINTOMAS = [
   },
   {
     nombre: 'Dolor de muela / boca',
+    categoria: 'sentidos',
     claves: ['muela', 'diente', 'dientes', 'boca', 'encia', 'odontologia'],
     nivel: NIVELES.CONSULTA,
     adonde: 'Consulta odontológica',
@@ -331,6 +340,7 @@ const SINTOMAS = [
   },
   {
     nombre: 'Dolor de oído',
+    categoria: 'sentidos',
     claves: ['oido', 'oreja', 'otitis', 'me duele el oido'],
     nivel: NIVELES.CONSULTA,
     adonde: 'Consulta médica',
@@ -340,6 +350,7 @@ const SINTOMAS = [
   },
   {
     nombre: 'Golpe en la cabeza (trauma)',
+    categoria: 'neurologica',
     claves: ['golpe', 'trauma', 'cabeza golpe', 'caida', 'accidente'],
     nivel: NIVELES.URGENCIA,
     adonde: 'Urgencias',
@@ -352,6 +363,7 @@ const SINTOMAS = [
   },
   {
     nombre: 'Síntomas en el embarazo',
+    categoria: 'gineco',
     claves: ['embarazo', 'embarazada', 'gestacion', 'bebe', 'parto'],
     nivel: NIVELES.URGENCIA,
     adonde: 'Urgencias de ginecobstetricia',
@@ -363,6 +375,20 @@ const SINTOMAS = [
       'Disminución de movimientos del bebé → URGENCIA',
     ],
   },
+];
+
+/**
+ * CATEGORÍAS por sistema/aparato para agrupar los síntomas en la búsqueda.
+ * El campo "orden" controla cómo se muestran (más urgente/vital primero).
+ */
+const CATEGORIAS = [
+  { id: 'cardio_resp', etiqueta: 'Cardiovascular / Respiratoria', emoji: '❤️', orden: 1 },
+  { id: 'neurologica', etiqueta: 'Neurológica', emoji: '🧠', orden: 2 },
+  { id: 'osteomuscular', etiqueta: 'Osteomuscular / Trauma', emoji: '🦴', orden: 3 },
+  { id: 'gastrointestinal', etiqueta: 'Gastrointestinal', emoji: '🍽️', orden: 4 },
+  { id: 'gineco', etiqueta: 'Gineco-obstétrica', emoji: '🤰', orden: 5 },
+  { id: 'sentidos', etiqueta: 'Ojos, oído y boca', emoji: '👁️', orden: 6 },
+  { id: 'general', etiqueta: 'General / Infecciosa', emoji: '🌡️', orden: 7 },
 ];
 
 /* Especialidades: cuándo acudir a cada una */

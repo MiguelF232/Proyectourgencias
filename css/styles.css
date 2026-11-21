@@ -109,7 +109,19 @@ body {
 }
 .search__input:focus { outline: none; border-color: var(--azul); }
 
-.chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 18px; }
+.chips { margin: 12px 0 18px; }
+.chip-grupo { margin-bottom: 16px; }
+.chip-grupo__titulo {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--gris);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin: 0 0 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--borde);
+}
+.chip-grupo__chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .chip {
   border: 1px solid var(--borde);
   background: #fff;
